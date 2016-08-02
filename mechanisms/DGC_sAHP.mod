@@ -5,8 +5,9 @@ NEURON {
 	USEION ca READ ica
 	USEION k READ ek WRITE ik
 	RANGE gbar, g, i
-	GLOBAL ca0, tau, taucadiv, n, kca, cah, a1max, a2, b1, b2 
-	GLOBAL tau1Ref, tau1, tau2, oinf, c1inf, CaRef
+	GLOBAL ca0, tau, taucadiv, n, kca, cah
+	GLOBAL tau1Ref, tau2, oinf, c1inf, CaRef
+	RANGE a2, a1max, b1, b2, tau1
 }
 
 UNITS {
