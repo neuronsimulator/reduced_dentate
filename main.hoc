@@ -65,7 +65,7 @@ proc mkvrecord() { local nCellTypes, numCells, numRec, i, j, k, offset, n, p, fr
     
     for k=0, nCellTypes-1 { 
         
-        rs = new RandomStream(k)    
+        rs = new RandomStream(k, 0, 0)
         
         cellType = cellTypes.o(k)
         numCells = cellType.getPropertyScalar("numCells")
@@ -306,8 +306,8 @@ proc mkcells() { local nCellTypes, numCells, i, j, p, gid, hasSynapseProps, temp
                    printf ("host %d: mkcells: i = %d gid = %d\n", pnm.myid, i, gid)
                }
                // used for choosing dendrite and compartment for synapses
-               rsdend = new RandomStream(i*k+1)
-               rscomp = new RandomStream(i*k+2)
+               rsdend = new RandomStream(gid, k, 1)
+               rscomp = new RandomStream(gid, k, 2)
                sprint(cmd, "cell = new %s(%d, %d, %d, \"%s/%s/\")", templateName, i, gid, gid, datasetPath, typeName)
                execute(cmd)
                if (hasSynapseProps) {
