@@ -1,0 +1,7 @@
+
+strdef parameters
+parameters="./parameters/Control.hoc"
+
+xopen("main.hoc")
+
+

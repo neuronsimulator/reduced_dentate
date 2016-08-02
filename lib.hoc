@@ -1,0 +1,833 @@
+
+// Dictionary template
+{xopen("./templates/Dict.hoc")}
+
+// Value template
+{xopen("./templates/Value.hoc")}
+
+objref strfun
+strfun = new StringFunctions()
+
+proc assert() { local test strdef errmsg
+    
+    test = $1
+    errmsg = $s2
+    
+    if (!test) {
+        execerror ("Assertion failed: ", errmsg)
+    }
+}
+
+
+// prints all the sections of the given cell
+proc printCellSections() { localobj cell strdef typeName
+    typeName = $s1
+    cell = $o2
+    if (strfun.is_artificial(cell) == 0) {
+      printf("Cell type %s:\n", typeName)
+      forsec cell.all { psection() }
+    }
+}
+
+// Adds a network connection to a single synapse in a list
+proc mknetcon1() { local srcgid, index localobj synlist, pnm, nc
+    pnm = $o1
+    srcgid = $2
+    synlist = $o3
+    index = $4
+    //printf("mknetcon1: synlist.count() = %d index = %d\n", synlist.count(), index)
+    nc = pnm.pc.gid_connect(srcgid, synlist.o(index))
+    nc.weight = $5
+    nc.delay = $6
+    pnm.nclist.append(nc)
+}
+
+
+// Adds network connections to all synapses in a list
+proc mknetcon() { local i localobj synlist, pnm, nc
+    pnm = $o1
+    synlist = $o3
+    for i=0, synlist.count()-1 {
+        nc = pnm.pc.gid_connect($2, synlist.o(i))
+        nc.weight = $4
+        nc.delay = $5
+        pnm.nclist.append(nc)
+    }
+}
+
+
+
+// A variant of ParallelNetManager.nc_append that takes in a synaptic
+// point process as an argument (as opposed to the index of a synapse in cell.synlist)
+func nc_appendsyn() {local i, se, lsrc, ltar localobj w, nc, pnm, cell, synlist, synType
+    i = -1
+    pnm = $o1
+    lsrc = $2
+    ltar = $3
+    synType = $o4
+    w   = $o5
+    del = $6
+    if (pnm.gid_exists(ltar)) {
+        // target in this subset
+        // source may be on this or another machine
+        cell = pnm.pc.gid2cell(ltar)
+        assert (synType.is_undefined == 0,"synType is undefined")
+        i = pnm.nclist.count()
+        if (synType.is_number) {
+            mknetcon(pnm, lsrc, cell.syns.o(synType.n), w.n/1000.0, del)
+        } else {
+            mknetcon(pnm, lsrc, cell.syns.o(synType.l.o(0).n), w.l.o(0).n/1000.0, del)
+            mknetcon(pnm, lsrc, cell.syns.o(synType.l.o(1).n), w.l.o(1).n/1000.0, del)
+        }
+    } 
+    return i
+}
+
+
+
+// helper function to create synapses
+proc mksyn() { local i, dendnum, compnum localobj cell, nc, syn, riseTime, decayTime, erev, dend, comp, count, rsdend, rscomp, dendindex, compindex strdef cellTypeName
+
+    cell = $o1
+    riseTime = $o2
+    decayTime = $o3
+    erev = $o4
+    dend = $o5 
+    comp = $o6
+    rsdend = $o7
+    rscomp = $o8
+    cellTypeName = $s9
+
+    if (verbose > 0) {
+        printf ("mksyn: cellTypeName = %s dend.count = %d comp.count = %d\n", cellTypeName, dend.count(), comp.count())
+    }
+    
+    // TODO: use count property for total number of synapses to create
+    rsdend.r.discunif(1,4)
+    rscomp.r.discunif(1,4)
+
+    for i = 0, dend.count()-1 {
+
+        dendindex = dend.o(i)
+        compindex = comp.o(i)
+        
+        assert (dendindex.is_undefined == 0,"mksyn: dendindex is undefined")
+        assert (compindex.is_undefined == 0,"mksyn: compindex is undefined")
+        
+        if (dendindex.is_nil) { continue }
+
+        if (dendindex.is_list) {
+
+            dendnum = rsdend.repick() % (dendindex.l.o(1).n+1)
+            if (compindex.is_list) {
+              compnum = rscomp.repick() % (compindex.l.o(1).n+1)
+            } else {
+              compnum = compindex.n
+            }
+            
+            if (verbose > 0) {
+                printf ("mksyn: cellTypeName = %s dendnum = %d compnum = %d\n", cellTypeName, dendnum, compnum)
+            }
+
+            cell.dendrites[dendnum][compnum] {
+                
+	        syn = new Exp2Syn(0.5)
+                syn.tau1 = riseTime.o(i).n
+                syn.tau2 = decayTime.o(i).n
+                syn.e = erev.o(i).n
+    		cell.syns.o(i).append(syn)
+            }
+            
+ 	} else if (dendindex.is_number) {
+            
+            dendnum = dendindex.n
+	    if (compindex.is_list) {
+                compnum = rscomp.repick() % (compindex.l.o(1).n+1)
+            } else {
+                compnum = compindex.n
+            }
+            
+            if (verbose > 0) {
+                printf ("mksyn (dendindex is a number): cellTypeName = %s dendnum = %d compnum = %d\n", cellTypeName, dendnum, compnum)
+            }
+            
+            cell.dendrites[dendnum][compnum] {
+	        syn = new Exp2Syn(0.5)
+                syn.tau1 = riseTime.o(i).n
+                syn.tau2 = decayTime.o(i).n
+                syn.e = erev.o(i).n
+    		cell.syns.o(i).append(syn)
+            }
+            
+ 	} else {
+            
+            if (verbose > 0) {
+                printf ("mksyn: cellTypeName = %s synapse in soma\n", cellTypeName)
+            }
+            
+            cell.soma {
+	        syn = new Exp2Syn(0.5)
+                syn.tau1 = riseTime.o(i).n
+                syn.tau2 = decayTime.o(i).n
+                syn.e = erev.o(i).n
+    		cell.syns.o(i).append(syn)
+                
+            }
+        }
+        
+    }
+
+    
+}
+
+// Writes out connectivity graph
+proc graphout() { local i,j,node localobj f, v, conlist
+    f = new File($s1)
+    conlist = $o2
+    f.wopen()
+    for i=0, conlist.count()-1 {
+        v = conlist.object(i)
+        node = v.x[0]
+        for j=1, v.size()-1 {
+            f.printf("%d %d\n", node, v.x[j])
+        }
+    }
+    f.close()
+}
+
+// Writes out spike time information
+proc spikeout() { local i localobj f, spikevec, idvec
+    
+    f = new File($s1)
+    spikevec = $o2
+    idvec = $o3
+    
+    f.wopen()
+    for i=0, spikevec.size-1 {
+	f.printf("%g %d\n", spikevec.x[i], idvec.x[i])
+    }
+    f.close()
+}
+
+// Returns the index of the named cell type or -1 if the type was not found
+func findCellType() { local i, result localobj cellTypes, cellType
+    
+    strdef typeName
+    
+    cellTypes = $o1
+    typeName = $s2
+    
+    result = -1
+    
+    for i=0, cellTypes.count()-1 {
+        
+        cellType = cellTypes.o(i)
+        if (strcmp(typeName, cellType.getPropertyString("typeName").s) == 0) {
+            result = i
+            break
+        }
+        
+    }
+    
+    return result
+}
+
+// Loads cell/synapse type info into a Dict
+proc loadCellCategoryInfo() { local i, numCells, offset, minIndex, maxIndex localobj f, ff, cellTypes, cellType, indices, indicesCoords
+    
+    strdef templateType, cellTypeName, cellTypeTemplateName, indexType, indexFileName, datasetPath, indexPath, errmsg
+    
+    // The first argument must be a list
+    cellTypes = $o1
+    
+    // The second argument must be the path to the cell types file 
+    f = new File()
+    f.ropen($s2)
+    
+    // The third argument must be the path to the directory containing all datasets
+    datasetPath = $s3
+    
+    // Scan the first line, which contains the number of cell types
+    numCellTypes = f.scanvar()
+    
+    offset = 0
+    for i=0, numCellTypes-1 {
+        
+        cellType = new Dict(cellTypeName)
+
+        // Scan in the cell name, template name, number of cells
+	f.scanstr(indexType)
+        
+        // population size is specified as cardinality (= set size)
+        if (strcmp(indexType,"cardinality:") == 0) {
+	    numCells = f.scanvar()
+            
+            cellType.addPropertyScalar("offset",offset)
+            offset = offset + numCells
+        } else if (strcmp(indexType,"indexfile:") == 0) {
+	    f.scanstr(indexFileName)
+            cellType.addPropertyString("indexFileName",indexFileName)
+            sprint(indexPath,"%s/%s",datasetPath,indexFileName)
+            indicesCoords = new Matrix()
+            ff = new File()
+            ff.ropen(indexPath)
+            indicesCoords.scanf(ff)
+            ff.close(indexPath)
+            indices = indicesCoords.getcol(0)
+            numCells = indices.size()
+            minIndex = indices.min()
+            maxIndex = indices.max()
+            if (offset > minIndex) {
+                sprint(errmsg,"loadCellCategoryInfo: current offset %d overlaps with minimum index (%d) in file %s",offset,minIndex,indexPath)
+                execerror(errmsg)
+            } 
+            cellType.addPropertyScalar("offset",minIndex)
+            cellType.addPropertyObject("indices",indices)
+            offset = maxIndex+1
+        } else {
+            sprint(errmsg, "loadCellCategoryInfo: unknown index type %s", indexType)
+            execerror(errmsg)
+        }
+	f.scanstr(cellTypeName)
+        cellType.addPropertyScalar("numCells",numCells) 
+        cellType.addPropertyString("typeName",cellTypeName)
+        
+	f.scanstr(templateType)
+        if (strcmp(templateType,"multiforest:") == 0) { 
+            cellType.addPropertyScalar("templateType",2)
+        } else if (strcmp(templateType,"forest:") == 0) { 
+            cellType.addPropertyScalar("templateType",1)
+        } else if (strcmp(templateType,"single:") == 0) {
+            cellType.addPropertyScalar("templateType",0)
+        } else {
+            sprint(errmsg,"invalid template type %s",templateType)
+            execerror(errmsg)
+        }
+	f.scanstr(cellTypeTemplateName)
+        cellType.addPropertyString("templateName",cellTypeTemplateName)
+        cellTypes.append(cellType)
+    }
+    f.close()
+    
+}
+
+
+// Reads in a single synapse matrix, regardless of which type of data is stored in it,
+// and stores it in a Dict
+obfunc loadSynapseMatrix() { local i, j, k, numValue, numValueOpt, numCellTypes, numSynapseTypes, count localobj f, synapseNames, synapseName, synapseCells, synapseCell, synapseRows, synapseRow, dict, value, lst, lvalue
+    
+    strdef str, propertyName, valueString
+    
+    // the first argument should be the opened file
+    f = $o1
+    // the second argument is the name of this type of synaptic property
+    propertyName = $s2
+    // Scan the first line, which contains the numbers of cell/synapse types
+    numSynapseTypes = f.scanvar()
+    numCellTypes = f.scanvar()
+    
+    synapseNames = new List()
+    synapseCells = new List()
+    synapseRows = new List()
+
+    for i=0, numCellTypes-1 {
+        f.scanstr(str)
+        synapseName = new String(str)
+        synapseNames.append(synapseName)
+        synapseCells.append(new List())
+    }
+    for i=0, numSynapseTypes-1 {
+        synapseRows.append(new List())
+    }
+
+    for i=0, numSynapseTypes-1 {
+        synapseRow = synapseRows.o(i)
+        for j=0, numCellTypes-1 {
+            f.scanstr(valueString)
+            if (strcmp(valueString,"NA") == 0) {
+                synapseRow.append(new Value(-1))
+            } else {
+                count = sscanf(valueString,"%lf:%lf",&numValue,&numValueOpt)
+                if (count > 1) {
+                    lst = new List()
+                    lst.append(new Value(0,numValue))
+                    lst.append(new Value(0,numValueOpt))
+                    value = new Value(2,lst)
+                    synapseRow.append(value)
+                } else if (count > 0) {
+                    value = new Value(0,numValue)
+                    synapseRow.append(value)
+                } else {
+                    value = new Value(1,valueString)
+                    synapseRow.append(value)
+                }
+            }
+        }
+    }
+
+    for j=0, numSynapseTypes-1 {
+      for i=0, numCellTypes-1 {
+            synapseCell = synapseCells.o(i)
+            synapseRow = synapseRows.o(j)
+	    synapseCell.append(synapseRow.o(i))
+	}
+    }
+
+    dict = new Dict(propertyName)
+    
+    dict.addPropertyString("name",propertyName)
+    dict.addPropertyObject("synapseNames",synapseNames)
+    dict.addPropertyObject("synapseCells",synapseCells)
+    
+    return dict
+}
+
+
+// Loads synapse info into a Dict
+proc loadSynapseInfo() { local i, order  localobj f, synapsePropertyTypes, synProps, fileList, propList
+    
+    strdef path, datasetPath
+    
+    // The first argument must be a list
+    synapsePropertyTypes = $o1
+    // The second argument must be the path that contains the synapse properties files
+    datasetPath = $s2
+    
+    // The list of synaptic properties names
+    propList = new List()
+    propList.append(new String("weight"))
+    propList.append(new String("rise time"))
+    propList.append(new String("decay time"))
+    propList.append(new String("reversal potential"))
+    propList.append(new String("dendrite"))
+    propList.append(new String("compartment"))
+    
+    // The list of synaptic properties files
+    fileList = new List()
+    fileList.append(new String("synweight.dat"))
+    fileList.append(new String("synrise.dat"))
+    fileList.append(new String("syndecay.dat"))
+    fileList.append(new String("synerev.dat"))
+    fileList.append(new String("syndend.dat"))
+    fileList.append(new String("syncomp.dat"))
+    
+    for i=0, fileList.count()-1 {
+        sprint(path,"%s/%s",datasetPath,fileList.o(i).s)
+        f = new File()
+        f.ropen(path)
+        synProps = loadSynapseMatrix(f,propList.o(i).s)
+        synapsePropertyTypes.append(synProps)
+        f.close()
+    }
+}
+
+
+
+// Retrieves the synaptic properties for a given cell type
+obfunc getSynapseProperties() { local i, j, synIndex localobj synProps, synapticTypes, synapticType, synapseNames, synapseCells
+    
+    strdef cellType
+    
+    synapticTypes = $o1
+    cellType = $s2
+    
+    synProps = new Dict(cellType)
+    for i=0, synapticTypes.count()-1 {
+       
+        synapticType = synapticTypes.o(i)
+        synapseNames = synapticType.getPropertyObject("synapseNames")
+        synapseCells = synapticType.getPropertyObject("synapseCells")
+        synIndex  = -1
+        for j = 0, synapseNames.count()-1 {
+            if (strcmp(cellType,synapseNames.o(j).s) == 0) {
+                synIndex = j
+                break
+            }
+        }
+        if (synIndex >= 0) {
+            synProps.addPropertyObject(synapticType.dictName, synapseCells.o(synIndex))
+        } else {
+          sprint(errmsg,"getSynapseProperties: synaptic type %s not found",cellType)
+          execerror(errmsg)
+        }
+    }
+    
+    return synProps
+}
+    
+
+
+// Returns true if there are synaptic properties for a given cell type
+func hasSynapseProperties() { local synIndex localobj synapticType, synapticTypes, synapseNames, synapseCells
+    
+    strdef cellType
+    
+    synapticTypes = $o1
+    cellType = $s2
+    
+    for i=0, synapticTypes.count()-1 {
+       
+        synapticType = synapticTypes.o(i)
+        synapseNames = synapticType.getPropertyObject("synapseNames")
+        synapseCells = synapticType.getPropertyObject("synapseCells")
+        synIndex  = -1
+        for j = 0, synapseNames.count()-1 {
+            if (strcmp(cellType,synapseNames.o(j).s) == 0) {
+                synIndex = j
+                break
+            }
+        }
+    }
+    
+    return (synIndex >= 0)
+}
+    
+
+
+
+// Loads connectivity info into a Dict
+proc loadConnectivityInfo() { local i, synCount, order, wdType, standardWeight1, standardWeight2, standardVelocity, numConnectivityTypes, synType1, synType2 localobj f, ff, l, connectivityTypes, connectivityType, weightHistogram, value
+    
+    strdef wdTypeString, orderType, connectivityName, preSynapticPopulation, postSynapticPopulation, synTypeString, weightHistogramFilename
+    
+    // The first argument must be a list
+    connectivityTypes = $o1
+    
+    // The second argument must be the path to the main connection file 
+    f = new File()
+    f.ropen($s2)
+    
+    // Scan the first line, which contains the number of connectivity matrices
+    numConnectivityTypes = f.scanvar()
+    if (verbose > 0) {
+       printf ("numConnectivityTypes = %d\n", numConnectivityTypes)
+    }
+
+    for i=0, numConnectivityTypes-1 {
+        
+        // Read in the connectivity cell id numbering (0 - relative, 1 - absolute, 
+        // 2 - relative presynaptic, absolute postsynaptic)
+        f.scanstr(orderType)
+        if (strcmp(orderType,"relpre.abspost:") == 0) {
+            order = 2
+        } else if (strcmp(orderType,"absolute:") == 0) {
+            order = 1
+        } else if (strcmp(orderType,"relative:") == 0) {
+            order = 0
+        } else {
+            execerror ("unknown connectivity order type")
+        }
+        // Read in the connectivity name
+	f.scanstr(connectivityName)
+        // Read in the name of the presynaptic population
+	f.scanstr(preSynapticPopulation)
+        // Read in the name of the postsynaptic population
+	f.scanstr(postSynapticPopulation)
+        // Read in the synapse type index
+        f.scanstr(synTypeString)
+        synCount = sscanf(synTypeString,"%lf:%lf",&synType1,&synType2)
+        // Read in the type of weight+delay specification
+	f.scanstr(wdTypeString)
+        if (strcmp(wdTypeString,"dist") == 0) {
+            wdType = 4
+        } else if (strcmp(wdTypeString,"dist.layer.sect.node") == 0) {
+            wdType = 3
+        } else if (strcmp(wdTypeString,"long.+trans.dist") == 0) {
+            wdType = 2
+        } else if (strcmp(wdTypeString,"weight+delay") == 0) {
+            wdType = 1
+        } else {
+            execerror ("unknown connectivity weight+delay type")
+        }
+        if (verbose > 0) {
+          printf ("ConnectivityType: i = %d\n", i)
+          printf ("ConnectivityType: name = %s\n", connectivityName)
+          printf ("ConnectivityType: pre = %s\n", preSynapticPopulation)
+          printf ("ConnectivityType: post = %s\n", postSynapticPopulation)
+          printf ("ConnectivityType: wdType = %d\n", wdType)
+        }
+        if (wdType == 1) {
+            connectivityType = new Dict(connectivityName)
+            connectivityType.addPropertyString("name",connectivityName)
+            connectivityType.addPropertyString("presynapticPopulation",preSynapticPopulation)
+            connectivityType.addPropertyString("postsynapticPopulation",postSynapticPopulation)
+            if (synCount > 1) {
+                l = new List()
+                l.append(new Value(0,synType1))
+                l.append(new Value(0,synType2))
+                value = new Value(2,l)
+                connectivityType.addPropertyObject("synType",value)
+            } else {
+                value = new Value(0,synType1)
+                connectivityType.addPropertyObject("synType",value)
+            }
+            connectivityType.addPropertyScalar("wdType",wdType)
+            connectivityType.addPropertyScalar("order",order)
+            connectivityTypes.append(connectivityType)
+        } else if (wdType == 2) {
+            connectivityType = new Dict(connectivityName)
+            if (synCount > 1) {
+                f.scanstr(wdTypeString)
+                sscanf(wdTypeString,"%lf:%lf",&standardWeight1,&standardWeight2)
+                l = new List()
+                l.append(new Value(0,standardWeight1))
+                l.append(new Value(0,standardWeight2))
+                value = new Value(2,l)
+                connectivityType.addPropertyObject("standardWeight",value)
+            } else {
+                standardWeight1 = f.scanvar()
+                value = new Value(0,standardWeight1)
+                connectivityType.addPropertyObject("standardWeight",value)
+            }
+            standardVelocity = f.scanvar()
+            connectivityType.addPropertyString("name",connectivityName)
+            connectivityType.addPropertyString("presynapticPopulation",preSynapticPopulation)
+            connectivityType.addPropertyString("postsynapticPopulation",postSynapticPopulation)
+
+            if (synCount > 1) {
+                l = new List()
+                l.append(new Value(0,synType1))
+                l.append(new Value(0,synType2))
+                value = new Value(2,l)
+                connectivityType.addPropertyObject("synType",value)
+            } else {
+                value = new Value(0,synType1)
+                connectivityType.addPropertyObject("synType",value)
+            }
+
+            connectivityType.addPropertyScalar("wdType",wdType)
+            connectivityType.addPropertyScalar("standardVelocity",standardVelocity)
+            connectivityType.addPropertyScalar("order",order)
+            connectivityTypes.append(connectivityType)
+        } else if (wdType == 3) {
+            connectivityType = new Dict(connectivityName)
+            assert (synCount == 1,"unsupported number of synaptic mechanisms")
+            
+            f.scanstr(weightHistogramFilename)
+            weightHistogram = new Vector()
+            
+            ff = new File()
+            ff.ropen(weightHistogramFilename)
+            weightHistogram.scanf(ff)
+            ff.close()
+            
+            //weightHistogram.mul(10.0)
+            value = new Value(3,weightHistogram)
+            connectivityType.addPropertyObject("weightHistogram",value)
+
+            standardVelocity = f.scanvar()
+            connectivityType.addPropertyScalar("standardVelocity",standardVelocity)
+            connectivityType.addPropertyString("name",connectivityName)
+            connectivityType.addPropertyString("presynapticPopulation",preSynapticPopulation)
+            connectivityType.addPropertyString("postsynapticPopulation",postSynapticPopulation)
+            
+            value = new Value(0,synType1)
+            connectivityType.addPropertyObject("synType",value)
+            connectivityType.addPropertyScalar("wdType",wdType)
+            connectivityType.addPropertyScalar("order",order)
+            connectivityTypes.append(connectivityType)
+            
+        } else if (wdType == 4) {
+            connectivityType = new Dict(connectivityName)
+            if (synCount > 1) {
+                f.scanstr(wdTypeString)
+                sscanf(wdTypeString,"%lf:%lf",&standardWeight1,&standardWeight2)
+                l = new List()
+                l.append(new Value(0,standardWeight1))
+                l.append(new Value(0,standardWeight2))
+                value = new Value(2,l)
+                connectivityType.addPropertyObject("standardWeight",value)
+            } else {
+                standardWeight1 = f.scanvar()
+                value = new Value(0,standardWeight1)
+                connectivityType.addPropertyObject("standardWeight",value)
+            }
+            standardVelocity = f.scanvar()
+            connectivityType.addPropertyString("name",connectivityName)
+            connectivityType.addPropertyString("presynapticPopulation",preSynapticPopulation)
+            connectivityType.addPropertyString("postsynapticPopulation",postSynapticPopulation)
+
+            if (synCount > 1) {
+                l = new List()
+                l.append(new Value(0,synType1))
+                l.append(new Value(0,synType2))
+                value = new Value(2,l)
+                connectivityType.addPropertyObject("synType",value)
+            } else {
+                value = new Value(0,synType1)
+                connectivityType.addPropertyObject("synType",value)
+            }
+
+            connectivityType.addPropertyScalar("wdType",wdType)
+            connectivityType.addPropertyScalar("standardVelocity",standardVelocity)
+            connectivityType.addPropertyScalar("order",order)
+            connectivityTypes.append(connectivityType)
+
+        }
+    }
+    f.close()
+    
+}
+
+
+
+// Loads gap junction info into a Dict
+proc loadGapJunctionInfo() { local i, order, numGJTypes localobj f, gjTypes, gjType
+    
+    strdef gjName, srcPopulation, destPopulation
+    
+    // The first argument must be a list
+    gjTypes = $o1
+    
+    // The second argument must be the path to the main connection file 
+    f = new File()
+    f.ropen($s2)
+    
+    // Scan the first line, which contains the number of connectivity matrices
+    numGJTypes = f.scanvar()
+    
+    for i=0, numGJTypes-1 {
+        
+        // Read in the cell id numbering (0 - relative, 1 - absolute)
+	order = f.scanvar()
+        // Read in the gap junction connectivity name
+	f.scanstr(gjName)
+        // Read in the name of the source population
+	f.scanstr(srcPopulation)
+        // Read in the name of the destination population
+	f.scanstr(destPopulation)
+        gjType = new Dict(gjName)
+        gjType.addPropertyString("name",gjName)
+        gjType.addPropertyString("srcPopulation",srcPopulation)
+        gjType.addPropertyString("destPopulation",destPopulation)
+        gjType.addPropertyScalar("order",order)
+        gjTypes.append(gjType)
+    }
+    f.close()
+    
+}
+
+
+proc loadStimulationInfo() { local i, weight, number, start, noise, rate localobj f, ff, m, indices, stimType, stimTypes
+    
+    strdef stimTypeName, cellTypeName, datasetPath, indexPath, errmsg
+    
+    // The first argument must be a list
+    stimTypes = $o1
+    
+    // The second argument must be the path to the stim types file 
+    f = new File()
+    f.ropen($s2)
+    
+    // The third argument must be the path to the directory containing all datasets
+    datasetPath = $s3
+    
+    // Scan the first line, which contains the number of stim types
+    numStimTypes = f.scanvar()
+    
+    if (numStimTypes > 0) {
+        for i=0, numStimTypes-1 {
+            
+            // Scan in the cell name, template name, number of cells
+	    f.scanstr(stimTypeName)
+            stimType = new Dict(stimTypeName)
+            stimType.addPropertyString("typeName",stimTypeName)
+            
+            sprint(indexPath,"%s/%s.dat",datasetPath,stimTypeName)
+            indices = new Vector()
+            ff = new File()
+            ff.ropen(indexPath)
+	    numCells = ff.scanvar()
+            ff.scanvar()
+            indices.buffer_size(numCells)
+            indices.scanf(ff,numCells)
+            ff.close(indexPath)
+            stimType.addPropertyObject("indices",indices)
+	    f.scanstr(cellTypeName)
+            stimType.addPropertyString("cellTypeName",cellTypeName)
+            weight = f.scanvar()
+            stimType.addPropertyScalar("weight",weight)
+            noise = f.scanvar()
+            stimType.addPropertyScalar("noise",noise)
+            number = f.scanvar()
+            stimType.addPropertyScalar("number",number)
+            start = f.scanvar()
+            stimType.addPropertyScalar("start",start)
+            rate = f.scanvar()
+            stimType.addPropertyScalar("rate",rate)
+            stimTypes.append(stimType)
+        }
+    }
+    f.close()
+    
+}
+
+walltime = 0
+
+dt_status = 1.0
+proc simstatus() { local wt
+     wt = startsw()
+     if (walltime > 0) {
+       printf("*** computation time at t=%g ms was %g s\n", t, wt-walltime)
+     }
+     walltime = wt
+     if (t + dt_status < tstop) {
+        cvode.event(t + dt_status, "simstatus()")
+     }
+ }
+ 
+dt_vrecord = 0.1
+objref my_indicesVrecord, vrecordlog
+
+vrecordlog = new List()
+
+proc vrecord() { local status, gid, i localobj pnm, cell, vec strdef cmd
+    
+    pnm = $o1
+    
+    sprint(cmd, "my_indicesVrecord = indicesVrecord")
+    status = execute(cmd)
+
+    vec = new Vector(my_indicesVrecord.count())
+    for i=0, my_indicesVrecord.count()-1 {
+        gid  = my_indicesVrecord.o(i).n
+        cell = pnm.pc.gid2cell(gid)
+        if (strfun.is_artificial(cell) == 0) {
+           vec.x[i] = cell.soma.v
+        }
+    }
+    vrecordlog.prepend(vec)
+    if (t + dt_vrecord < tstop) {
+      cvode.event(t + dt_vrecord, "vrecord(pnm)")
+    }
+}
+
+// Writes out voltage traces
+proc vrecordout() { local i, j, status localobj f, vec, lst, indices
+
+    indices = $o2
+    
+    lst = new List()
+    for i=0, vrecordlog.count()-1 {
+        lst.prepend(vrecordlog.o(i))
+    }
+
+    f = new File($s1)
+    
+    f.wopen()
+    f.printf("# ")
+    for i=0, indices.count()-1 {
+	f.printf("%d ", indices.o(i).n)
+    }
+    f.printf("\n")
+    for i=0, lst.count()-1 {
+        vec = lst.o(i)
+	f.printf("%g ", i*dt_vrecord)
+	for j=0, vec.size()-1 {
+	   f.printf("%g ", vec.x[j])
+        }
+        f.printf("\n")
+    }
+    f.close()
+}
+

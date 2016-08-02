@@ -1,0 +1,180 @@
+
+
+func choose_index() { local i, x, Lsum localobj idxs, weights, r
+    
+    idxs = $o1
+    weights = $o2
+    r = $o3
+    
+    if (idxs.size() > 0) {
+        x = r.repick()
+        for i=0, weights.size()-1 {
+            if (x < weights.x[i]) {
+                break
+            } else {
+                x = x-weights.x[i]
+            }
+        }
+        return idxs.x[i]
+    } else {
+       return -1
+   }
+   
+}
+
+obfunc Lweights () { local i, Lsum localobj sects, lengths, weights
+    
+    sects = $o1
+    
+    Lsum = 0
+    lengths = new Vector()
+    weights = new Vector()
+    forsec sects {
+        lengths.append(L)
+        Lsum = Lsum + L
+    }
+    for i = 0, lengths.size()-1 {
+        weights.append(lengths.x[i]/Lsum)
+    }
+    
+    
+    return weights 
+}
+    
+
+proc synapses() { local i, j, k, x, Lsum localobj syn, lst, rs, rx, lengths
+    
+    nsyns_GC   = 1
+    nsyns_MC   = 1
+    nsyns_HC   = 4
+    nsyns_BC   = 10
+    nsyns_AA   = 4
+    nsyns_HCC  = 10
+    nsyns_NGFC = 10
+    naxons_AA = 3
+    
+    rs = new Random()
+    rs.Random123(random_stream_offset,gid)
+    rs.uniform(0,1)
+    
+    // random stream to generate synapse location within its compartment
+    rx = new Random()
+    rx.Random123(random_stream_offset+1,gid)
+    rx.uniform(0,1)
+    
+    // Calculate the length-dependent weights for each group of dendritic compartments
+    GCLDweights = Lweights(GCLDs)
+    PDweights   = Lweights(PDs)
+    MDweights   = Lweights(MDs)
+    DDweights   = Lweights(DDs)
+    
+    // Create combined indices and weights for the GCL+IML and MML+OML cases
+    GCLPDweights = new Vector()
+    GCLPDweights.append(GCLDweights)
+    GCLPDweights.append(PDweights)
+    
+    GCLPDidxs = new Vector()
+    GCLPDidxs.append(GCLDidxs)
+    GCLPDidxs.append(PDidxs)
+    
+    MDDweights = new Vector()
+    MDDweights.append(DDweights)
+    MDDweights.append(MDweights)
+    
+    MDDidxs = new Vector()
+    MDDidxs.append(DDidxs)
+    MDDidxs.append(MDidxs)
+    
+    // GC-GC synapses; location is GCL/IML
+    for i=0, nsyns_GC {
+        j = choose_index(GCLPDidxs,GCLPDweights,rs) // randomly select GCL dendrite
+        dendrites[j] { 
+            syn = new Exp2Syn(0.5)
+            syn.tau1 = 1.5	syn.tau2 = 5.5	syn.e = 0
+        } 
+        syns_GC.append(syn)
+    }
+    
+    // MC-GC synapses; location is IML
+    for i=0, nsyns_MC-1 {
+        j = choose_index(PDidxs,PDweights,rs) // randomly select proximal dendrite
+        dendrites[j] { 
+            syn = new Exp2Syn(rx.repick()) 
+            syn.tau1 = 1.5	syn.tau2 = 5.5	syn.e = 0
+        }
+        syns_MC.append(syn)
+    }
+
+    // HC-GC synapses; location is MMML/MOML
+    for i=0, nsyns_HC-1 {
+        j = choose_index(MDDidxs,MDDweights,rs) // randomly select middle/distal dendrite
+        dendrites[j] { 
+            syn = new Exp2Syn(rx.repick()) 
+            syn.tau1 = 0.05  	syn.tau2 = 1.25	syn.e = -85.7 
+        }
+        syns_HC.append(syn)
+    }
+    
+    // BC-GC synapses; location is soma/GCL
+    for i=0, nsyns_BC-2 {
+        j = choose_index(GCLDidxs,GCLDweights,rs) // randomly select GCL dendrite
+        dendrites[j] { 
+            syn = new Exp2Syn(rx.repick())
+            syn.tau1 = 0.25 syn.tau2 = 2.5  syn.e = -28.99
+        }
+        syns_BC.append(syn)
+    }
+    soma { 
+            syn = new Exp2Syn(rx.repick())
+            syn.tau1 = 0.25 syn.tau2 = 2.5 syn.e = -70.0
+        }
+    syns_BC.append(syn)
+    
+    // AA-GC synapses; location is GC axon
+    for i=0, nsyns_AA-1 {
+        x = rs.repick() // randomly select axon
+        for j = 0, 2 {
+            if (x < 1/naxons_AA) {
+                axon[j] { 
+                    syn = new Exp2Syn(rx.repick()) 
+                    syn.tau1 = 0.3	syn.tau2 = 2.9 syn.e = -28.99
+                }
+                syns_AA.append(syn)
+                break
+            } else {
+                x = x - 1/naxons_AA
+            }
+        }
+    }
+    
+    // HCC-GC synapses; location is IML
+    for i=0, nsyns_HCC-1 {
+        j = choose_index(PDidxs,PDweights,rs) // randomly select proximal dendrite
+        dendrites[j] { 
+            syn = new Exp2Syn(rx.repick()) 
+            syn.tau1 = 0.04	syn.tau2 = 1.1	syn.e = -28.99
+        }
+        syns_HCC.append(syn)
+    }
+    
+    // NGFC-GC synapses; location is MMML/MOML
+    for i=0, nsyns_NGFC-1 {
+        j = choose_index(MDDidxs,MDDweights,rs) // randomly select middle/distal dendrite
+        x = rx.repick()
+        dendrites[j] { 
+            syn = new Exp2Syn(x) 
+            syn.tau1 = 0.1	syn.tau2 = 10	syn.e = -38.148
+            syns_NGFC_GABAA.append(syn)
+            syn = new Exp2Syn(x) 
+            syn.tau1 = 86.8	syn.tau2 = 428.1 syn.e = -90
+            syns_NGFC_GABAB.append(syn)
+        }
+    }
+    
+    
+    soma {
+        syn_stim = new ExpSyn(0.5)
+        syn_stim.tau = 1
+    }
+
+}

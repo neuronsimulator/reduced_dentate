@@ -1,0 +1,154 @@
+
+begintemplate DGC
+
+// GCL - granular layer dendrite
+// PD - proximal dendrite
+// MD - middle dendrite
+// DD - distal dendrite
+
+//
+// Synaptic connections are organized by type of pre-synaptic cell:
+//
+// syns_GC - connections from other granule cells
+// syns_MC - connections from mossy cells
+// syns_HC - connections from HIPP cells
+// syns_BC - connections from PV+ basket cells
+// syns_AA - connections from axo-axonic cells
+// syns_HCC - connections from HICAP cells
+// syns_NGFC - connections from neurogliaform cells
+//
+
+public soma, axon, dendrites
+public all, allaxons, alldendrites, alldendritesList
+public nDends, nGCLD, nPD, nMD, nDD
+public GCLDidxs, PDidxs, MDidxs, DDidxs
+public syns, syns_GC, syns_MC, syns_HC, syns_BC, syns_AA, syns_HCC, syns_NGFC_GABAA, syns_NGFC_GABAB
+public ndendpts
+public verbose, filemode
+public syn_stim
+public is_art, connect2target
+
+verbose = 0
+filemode = 1
+id  = -1
+gid = -1
+random_stream_offset = 0
+
+create soma[1], axon[4], dendrites[1]
+
+objref GCLDs, PDs, MDs, DDs, all, allaxons, alldendrites, alldendritesList
+objref rates_soma, rates_axon, rates_seg
+objref gna_y_axon, gna_y_dend, dist_x_dend, dist_x_axon
+objref GCLDidxs, PDidxs, MDidxs, DDidxs, ndendpts
+objref GCLDweights, PDweights, MDweights, DDweights, GCLPDweights, MDDweights, GCLPDidxs, MDDidxs
+objref syns, syns_GC, syns_MC, syns_HC, syns_BC, syns_AA, syns_HCC, syns_NGFC_GABAA, syns_NGFC_GABAB
+objref syn_stim
+
+strdef dendrite_topology_fn
+strdef dendrite_points_fn
+strdef spine_density_fn
+
+
+xopen("DGC_Parameters_passive_na8st.hoc")
+xopen("DGC_Morphology_from_file_na8st.hoc")
+xopen("DGC_Biophysics_passive_na8st.hoc")
+xopen("DGC_Synapses.hoc")
+
+
+proc assert() { local test strdef errmsg
+    
+    test = $1
+    errmsg = $s2
+    
+    if (!test) {
+        execerror ("Assertion failed: ", errmsg)
+    }
+}
+
+proc read_Na_rates() { localobj fileS, fileA
+    
+    rates_soma = new Vector()
+    rates_axon = new Vector()
+    
+    fileS = new File()
+    fileA = new File()
+    
+    fileS.ropen("./dat/soma_st8.dat")
+    fileA.ropen("./dat/axon_st8.dat")
+    
+    while (fileS.eof==0){
+	rates_soma.append( fileS.scanvar() )
+	rates_axon.append( fileA.scanvar() )
+    }
+    
+    fileS.close()
+    fileA.close()
+}
+
+
+proc init() {
+    
+    id  = $1
+    gid = $2
+    random_stream_offset = $3
+    
+    sprint(dendrite_topology_fn, "dat/DGC_dendrite_topology.dat")
+    sprint(dendrite_points_fn, "dat/DGC_dendrite_points.dat")
+    sprint(spine_density_fn, "dat/DGC_spine_density.dat")
+    
+    parameters()
+    read_Na_rates()
+    celldef()
+    
+}
+
+
+proc celldef() {
+    
+    GCLDidxs = new Vector()
+    PDidxs  = new Vector()
+    MDidxs  = new Vector()
+    DDidxs  = new Vector()
+
+    syns_GC   = new List()
+    syns_MC   = new List()
+    syns_HC   = new List()
+    syns_BC   = new List()
+    syns_AA   = new List()
+    syns_HCC  = new List()
+    syns_NGFC_GABAA = new List()
+    syns_NGFC_GABAB = new List()
+    syns = new List() 
+
+    syns.append(syns_GC)
+    syns.append(syns_MC)
+    syns.append(syns_HC)
+    syns.append(syns_BC)
+    syns.append(syns_AA)
+    syns.append(syns_HCC)
+    syns.append(syns_NGFC_GABAA)
+    syns.append(syns_NGFC_GABAB)
+    
+    topol()
+    
+    shape()
+    subsets()
+    geom()
+    geom_spines()
+    biophys()
+    synapses()
+    
+    finitialize(v_init)
+}
+
+func is_art()  { return 0 }
+
+obfunc connect2target() { localobj nc // $o1 target point process, optional $o2 returned NetCon
+  soma nc = new NetCon(&v(1), $o1)
+  nc.threshold = 10
+  if (numarg() == 2) { $o2 = nc } // for backward compatibility
+  return nc
+}
+
+
+endtemplate DGC
