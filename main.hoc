@@ -300,7 +300,11 @@ proc mkcells() { local nCellTypes, numCells, i, j, p, gid, hasSynapseProps, temp
 
        for i=0, numCells-1 { 
            gid = indices.x(i)
+
            if (pnm.gid_exists(gid)) {
+               if (verbose > 0) {
+                   printf ("host %d: mkcells: i = %d gid = %d\n", pnm.myid, i, gid)
+               }
                // used for choosing dendrite and compartment for synapses
                rsdend = new RandomStream(i*k+1)
                rscomp = new RandomStream(i*k+2)
@@ -724,9 +728,11 @@ mknet(ncells)
 
 // Configuration of artificial spiking cells
 
-objref nc
+objref nc, stimcells
+stimcells = new List()
+ncstimlist = new List()
 
-proc mkstim() { local i, k, nCellTypes, numStimTypes, gid, weight, noise, number, start localobj stim, stimulationParameters, cellType, cellTypes, stimType, stimTypes, edges
+proc mkstim() { local i, k, nCellTypes, numStimTypes, gid, stimgid, weight, noise, number, start localobj stim, stimulationParameters, cellType, cellTypes, stimType, stimTypes, edges
     
     strdef templateName, typeName
     
@@ -745,10 +751,10 @@ proc mkstim() { local i, k, nCellTypes, numStimTypes, gid, weight, noise, number
     sprint (cmd, "nc%slist = new List()", typeName)
     execute(cmd)
     
-    stimgid = maxindex+1+pnm.myid()+1
+    stimgid = maxindex+1+pnm.myid*numStimTypes+1
     
     if (verbose >= 0) {
-        printf ("host %d: mkstim: maxindex = %d numStimTypes = %d stimgid = %d\n", pnm.myid(), maxindex, numStimTypes, stimgid)
+        printf ("host %d: mkstim: maxindex = %d numStimTypes = %d stimgid = %d\n", pnm.myid, maxindex, numStimTypes, stimgid)
     }
     
     for i=0, numStimTypes-1 { 
@@ -763,19 +769,20 @@ proc mkstim() { local i, k, nCellTypes, numStimTypes, gid, weight, noise, number
         rate = stimType.getPropertyScalar("rate")
         
         if (verbose > 0) {
-            printf ("mkstim:  weight = %g noise = %g number = %g start = %g rate = %g\n", weight, noise, number, start, rate)
+            printf ("mkstim:  i = %d stimgid = %d weight = %g noise = %g number = %g start = %g rate = %g\n", i, stimgid, weight, noise, number, start, rate)
         }
         
         stim = new StimCell(stimgid,0,0,rate,number,start,noise)
-
-        pnm.register_cell(stimgid, stim)
-        pnm.spike_record(stimgid) 
+        stimcells.append(stim)
+        
+        //pnm.register_cell(stimgid, stim)
+        //pnm.spike_record(stimgid) 
         
         for j=0, indices.size()-1 {
             
             gid = indices.x(j)
             if (pnm.gid_exists(gid)) {
-                nc = pnm.pc.gid_connect(stimgid, pnm.pc.gid2obj(gid).syn_stim)
+                nc = stim.connect2target(pnm.pc.gid2obj(gid).syn_stim, nc)
                 nc.weight = weight
                 nc.delay = 0.1
                 ncstimlist.append(nc)

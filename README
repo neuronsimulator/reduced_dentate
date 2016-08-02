@@ -1,28 +1,6 @@
-Dentate Gyrus network model
-===========================
 
-The network model code was developed by Ivan Raikov and Calvin
-Schneider, based on previous models published in the following papers:
 
-1. Santhakumar V, Aradi I, Soltesz I (2005) Role of mossy fiber
-sprouting and mossy cell loss in hyperexcitability: a network model of
-the dentate gyrus incorporating cell types and axonal topography. J
-Neurophysiol 93:437-53 
-
-2. Dyhrfjeld-Johnsen J, Santhakumar V, Morgan
-RJ, Huerta R, Tsimring L, Soltesz I (2007) Topological determinants of
-epileptogenesis in large-scale structural and functional models of the
-dentate gyrus derived from experimental data. J Neurophysiol
-97:1566-87
-
-3. Morgan RJ, Soltesz I (2008) Nonrandom connectivity of the epileptic
-dentate gyrus predicts a major role for neuronal hubs in
-seizures. Proc Natl Acad Sci U S A 105:6179-84 [PubMed] 
-
-4. Morgan RJ, Santhakumar V, Soltesz I (2007) Modeling the dentate
-gyrus. Prog Brain Res 163:639-58 
-
-The model of a dentate granule cell was taken from the following
+This model of a dentate granule cell was taken from the following
 paper and modified by Ivan Raikov:
 
 Pedro Mateos-Aparicio, Ricardo Murphy and Johan F. Storm (2014). 
@@ -37,54 +15,5 @@ understand the contribution of M and SK channels to the medium
 afterhyperpolarization (mAHP) following one or seven spikes, as 
 well as the contribution of M channels to the slow 
 afterhyperpolarization (sAHP). 
-
-
-
-Running the Network
-===================
-
-1) The NMODL mechanisms in subdirectory `mechanisms' must first be
-compiled:
-
-  $ cd mechanisms
-  $ nrnivmodl
-
-2) The network can be simulation by invoking the run.hoc script:
-
-  $ nrniv run.hoc
-
-This script uses the simulation parameters in parameters/Control.hoc
-and will place the resulting spike raster and voltage traces in
-directory `results'.
-
-3) Configuration files
-
-- parameters/Control.hoc: contains parameters that control the
-simulation, such as simulation duration and time step
-
-- datasets/Control: contains files that define the cells and
-connectivity in the network
-
-- datasets/Control/celltypes.dat: defines the templates and number of
-cells for each cell type
-
-- datasets/Control/connectivity.dat: defines the projections that
-  comprise the network
-
-- datasets/Control/gapjunctions.dat: defines the electrical
-  connections in the network
-
-- datasets/Control/stim.dat: defines the NetStim objects 
-  connected to the cells in the network and their activity
-
-- datasets/Control/syn*.dat: various synaptic properties
-  for all connection types
-
-
-
-
-
-
-
 
 
