@@ -55,11 +55,6 @@ INITIAL {
 	cai = ncai + lcai + tcai	
 	q=qinf
 	rate(cai)
-	VERBATIM
-	ncai = _ion_ncai;
-	lcai = _ion_lcai;
-	tcai = _ion_tcai;
-	ENDVERBATIM
 }
 
 

@@ -28,7 +28,8 @@ NEURON {
 	USEION lca READ elca WRITE ilca VALENCE 2
 	USEION ca READ cai, cao VALENCE 2 
         RANGE glcabar, cai, ilca, elca
-        GLOBAL minf,matu
+        :GLOBAL minf,matu
+	RANGE minf,matu
 }
 
 STATE {
@@ -47,9 +48,6 @@ ASSIGNED {
 INITIAL {
 	rate(v)
 	m = minf
-	VERBATIM
-	cai=_ion_cai;
-	ENDVERBATIM
 }
 
 BREAKPOINT {

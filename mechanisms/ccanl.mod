@@ -52,11 +52,6 @@ STATE {
 }
 
 INITIAL {
-	VERBATIM
-	ncai = _ion_ncai;
-	lcai = _ion_lcai;
-	tcai = _ion_tcai; 
-	ENDVERBATIM
 	ncai=caiinf/3
 	lcai=caiinf/3
 	tcai=caiinf/3

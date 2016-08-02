@@ -40,9 +40,6 @@ ASSIGNED {
 INITIAL {
       m = minf(v)
       h = hinf(v)
-	VERBATIM
-	cai=_ion_cai;
-	ENDVERBATIM
 }
 
 BREAKPOINT {
