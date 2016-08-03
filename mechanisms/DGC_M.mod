@@ -88,9 +88,9 @@ DERIVATIVE states {
 }
 
 PROCEDURE rates(v (mV)) {
-  TABLE minf, tau1, tau2, ginf
-	DEPEND celsius, gamma, k, Vhalf, Vshift, taudiv, Dtaumult1, Dtaumult2, tau0mult
-	FROM vmin TO vmax WITH 199
+:  TABLE minf, tau1, tau2, ginf
+:	DEPEND celsius, gamma, k, Vhalf, Vshift, taudiv, Dtaumult1, Dtaumult2, tau0mult
+:	FROM vmin TO vmax WITH 199
 	
   IF (gamma == 0.5) {
   	z1 = 2.8

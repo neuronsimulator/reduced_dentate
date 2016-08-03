@@ -78,7 +78,7 @@ FUNCTION efun(z) {
 
 FUNCTION hinf(v(mV)) {
 	LOCAL a,b
-	TABLE FROM -150 TO 150 WITH 200
+:	TABLE FROM -150 TO 150 WITH 200
 	a = 1.e-6*exptrap(3,-v/16.26)
 	b = 1/(exptrap(4,(-v+29.79)/10)+1)
 	hinf = a/(a+b)
