@@ -53,8 +53,8 @@ UNITSOFF
 
 INITIAL {
 	cai = ncai + lcai + tcai	
-	q=qinf
 	rate(cai)
+	q=qinf
 }
 
 
