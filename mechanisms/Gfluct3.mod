@@ -225,11 +225,16 @@ VERBATIM
 #if NRNBBCORE
 		assert(0);
 #endif
+#if !NRNBBCORE
 ENDVERBATIM
 	mynormrand = normrand(mean, std)
+VERBATIM
+#endif
+ENDVERBATIM
 }
 
-BEFORE BREAKPOINT {
+:BEFORE BREAKPOINT {
+PROCEDURE foo() {
 	if (on > 0) {
 		g_e = g_e0 + g_e1
 		if (g_e < 0) { g_e = 0 }
@@ -245,6 +250,7 @@ BEFORE BREAKPOINT {
 
 
 BREAKPOINT {
+      foo()
       i = ival   
     }
 
@@ -260,10 +266,16 @@ PROCEDURE oup() {		: use Scop function normrand(mean, std_dev)
 
 
 PROCEDURE new_seed(seed) {		: procedure to set the seed
+VERBATIM
+#if !NRNBBCORE
+ENDVERBATIM
 	set_seed(seed)
 	VERBATIM
 	  printf("Setting random generator with seed = %g\n", _lseed);
 	ENDVERBATIM
+VERBATIM  
+#endif
+ENDVERBATIM
 }
 
 PROCEDURE noiseFromRandom() {
@@ -328,6 +340,7 @@ FUNCTION exptrap(loc,x) {
 }
 
 VERBATIM
+#if !NRNBBCORE
 static void bbcore_write(double* x, int* d, int* xx, int *offset, _threadargsproto_) {
 	/* error if using the legacy normrand */
 	if (!_p_donotuse) {
@@ -351,6 +364,8 @@ static void bbcore_write(double* x, int* d, int* xx, int *offset, _threadargspro
 	}
 	*offset += 3;
 }
+#endif
+
 static void bbcore_read(double* x, int* d, int* xx, int* offset, _threadargsproto_) {
 	assert(!_p_donotuse);
 	uint32_t* di = ((uint32_t*)d) + *offset;
