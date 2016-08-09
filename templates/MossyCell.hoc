@@ -15,7 +15,7 @@ nst=10
 // dends is properly created in init()
 create soma, dendrites[1][1]
 
-objref fl, rs
+objref fl//, rs
 objref stim[nst]
 objref all, pdend, ddend
 objref syns, syns_GC, syns_MC, syns_HC, syns_BC, syns_AA, syns_HCC, syns_NGFC, syns_NGFCB
@@ -182,11 +182,12 @@ proc biophys() { local ndends, ndendsec
     fl.h = 0.25
     fl.on = 1
     
-    rs = new RandomStream(gid, 0, 3)
+    //rs = new RandomStream(gid, 0, 3)
     // set the stream to generate a gaussian distribution with mean 0 and variance 1
-    rs.r.normal(0, 1)
+    //rs.r.normal(0, 1)
     // use the random Gaussian distribution stream in the Gfluct2 mechanism
-    fl.noiseFromRandom(rs.r)
+    //fl.noiseFromRandom(rs.r)
+    fl.noiseFromRandom123(gid, 0, 3)
     
 }
 

@@ -159,7 +159,7 @@ VERBATIM
 
 /*
    1 means noiseFromRandom was called when _ran_compat was previously 0 .
-   2 means noiseFromRandom123 was called when _ran_compart was
+   2 means noiseFromRandom123 was called when _ran_compat was
 previously 0.
 */
 static int _ran_compat; /* specifies the noise style for all instances */
@@ -217,7 +217,7 @@ VERBATIM
 			x = nrn_random_pick(_p_donotuse);
 		}
 #else
-		x = nrnran123_normal(_p_donotuse);
+		x = nrnran123_normal((nrnran123_State*)_p_donotuse);
 #endif
 		x = _lmean + _lstd*x;
 		return x;
