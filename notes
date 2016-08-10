@@ -1,0 +1,21 @@
+nrnenv nrncore # hh.mod same as for coreneuron
+nrnivmodl mechanisms
+mkdir results
+mkdir coredat
+mpiexec -n 6 nrniv -mpi run.hoc
+cat results/*spike* | sort -k 1n,1n -k 2n,2n > out.spk
+
+mkdir modcore
+cp mechanisms/*.mod modcore
+cp ~/neuron/nrn/src/nrnoc/exp2syn.mod modcore
+rm modcore/vecevent.mod
+
+corenrnbuild -m modcore -s $HOME/bb/coreneuron -i $HOME/bb/install \
+  -b buildgpu -cflags 'DNRN_PRCELLSTATE=1' -nopg
+
+mpiexec -n 1 buildgpu/bin/coreneuron_exec -mpi -d coredat \
+  --cell_permute=1 -e 10 --voltage=-75.
+
+sortspike out0.dat temp
+diff -w out.spk temp
+
