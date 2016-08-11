@@ -26,13 +26,13 @@ NEURON {
 
 PARAMETER {
 	gskbar  (mho/cm2)
-	esk	(mV)
 }
 
 STATE { q }
 
 ASSIGNED {
 	isk (mA/cm2) gsk (mho/cm2) qinf qtau (ms)
+	esk	(mV)
 	celsius (degC)
 	v	(mV)
 	cai (mM)
