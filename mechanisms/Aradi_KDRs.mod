@@ -15,8 +15,6 @@ UNITS {
 PARAMETER {
 	erev = -85	  (mV)		: effective Ek
 	gbar = 0   		(S/cm2)
- 	vmin = -100		(mV)		: for look-up table
-	vmax = 100		(mV)
 } 
 
 
@@ -51,8 +49,6 @@ DERIVATIVE states {
 }
 
 PROCEDURE rates(v (mV)) {
-:TABLE minf, mtau
-:FROM vmin TO vmax WITH 199
   malpha = 0.028*(v+35)/(1-exptrap(1, -0.166*(v+35)))
   mbeta = 0.1056*exptrap(2, -0.025*(v+60))
   mtau = 1/(malpha + mbeta)
