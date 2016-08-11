@@ -99,14 +99,18 @@ proc topol() {
 
 
 proc biophys() {
+    
     gna=0.05
     gkdr=0.0132
     gka=0.00001
     
     forsec all {
+        Ra=100
+    }
+    forsec all {
         
 	insert ccanl
-        catau_ccanl = 10
+        catau_ccanl = 6
         caiinf_ccanl = 5.e-6
 	insert borgka
         gkabar_borgka=gka
@@ -141,7 +145,6 @@ proc biophys() {
 	gnatbar_ichan2=0
 	gl_ichan2 = 0.0001063
     }
-    forsec all {Ra=100}
     forsec all {
         ena = 55 
         ekf = -90  
