@@ -36,18 +36,16 @@ UNITS {
 :INDEPENDENT {t FROM 0 TO 100 WITH 100 (ms)}
 
 PARAMETER {
-    celsius (degC) : temperature - set in hoc; default is 6.3
-	depth = 200 (nm)	: assume volume = area*depth
-	catau = 9 (ms)
-	caiinf = 50.e-6 (mM)	: takes precedence over cai0_ca_ion
-			: Do not forget to initialize in hoc if different
-			: from this default.
-	cao = 2 (mM)
-	ica (mA/cm2)
+    depth = 200 (nm)	: assume volume = area*depth
+    catau = 9 (ms)
+    caiinf = 50.e-6 (mM)
+    cao = 2 (mM)
 }
 
 ASSIGNED {
-	eca (mV)
+    celsius (degC) 
+    eca (mV)
+    ica (mA/cm2)
 }
 
 STATE {

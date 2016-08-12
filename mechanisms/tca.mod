@@ -11,15 +11,6 @@ UNITS {
 	KTOMV = .0853 (mV/degC)
 }
 
-PARAMETER {
-	v (mV)
-	celsius = 6.3	(degC)
-	gcatbar=.003 (mho/cm2)
-	cai (mM)
-	cao (mM)
-}
-
-
 NEURON {
 	SUFFIX cat
 	USEION tca READ etca WRITE itca VALENCE 2
@@ -27,11 +18,20 @@ NEURON {
         RANGE gcatbar,cai, itca, etca
 }
 
+PARAMETER {
+	gcatbar=.003 (mho/cm2)
+	cao (mM)
+}
+
+
 STATE {
 	m h 
 }
 
 ASSIGNED {
+	v (mV)
+	celsius	(degC)
+	cai (mM)
 	itca (mA/cm2)
         gcat (mho/cm2)
 	etca (mV)

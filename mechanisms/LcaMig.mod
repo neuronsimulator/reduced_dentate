@@ -13,11 +13,8 @@ UNITS {
 }
 
 PARAMETER {
-	v (mV)
-	celsius 	(degC)
 	glcabar		 (mho/cm2)
 	ki=.001 (mM)
-	cai (mM)
 	cao (mM)
         tfa=1
 }
@@ -37,11 +34,14 @@ STATE {
 }
 
 ASSIGNED {
+	v (mV)
+	celsius 	(degC)
 	ilca (mA/cm2)
         glca (mho/cm2)
         minf
         matu   (ms)
 	elca (mV)   
+	cai (mM)
 
 }
 
