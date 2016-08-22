@@ -217,14 +217,12 @@ VERBATIM
 			x = nrn_random_pick(_p_donotuse);
 		}
 #else
+		#pragma acc routine(nrnran123_normal) seq
 		x = nrnran123_normal((nrnran123_State*)_p_donotuse);
 #endif
 		x = _lmean + _lstd*x;
 		return x;
 	}
-#if NRNBBCORE
-		assert(0);
-#endif
 #if !NRNBBCORE
 ENDVERBATIM
 	mynormrand = normrand(mean, std)
