@@ -8,7 +8,6 @@ cat results/*spike* | sort -k 1n,1n -k 2n,2n > out.spk
 mkdir modcore
 cp mechanisms/*.mod modcore
 cp ~/neuron/nrn/src/nrnoc/exp2syn.mod modcore
-rm modcore/vecevent.mod
 
 corenrnbuild -m modcore -s $HOME/bb/coreneuron -i $HOME/bb/install \
   -b buildgpu -cflags 'DNRN_PRCELLSTATE=1' -nopg
