@@ -73,7 +73,7 @@ INITIAL {
 }
 
 BREAKPOINT {
-	SOLVE state METHOD cnexp
+	SOLVE state METHOD derivimplicit
 	g = gbar*o^n
 	ik = g*(v - ek)*(1e-4)
 	i = ik
