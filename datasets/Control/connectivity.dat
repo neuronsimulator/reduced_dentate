@@ -1,4 +1,4 @@
-21
+22
 absolute: AACtoGC AAC GC 4 long.+trans.dist 1.0 250.0
 absolute: BCtoGC BC GC 3 long.+trans.dist 0.65 250.0
 absolute: HCtoGC HC GC 2 long.+trans.dist 6.0  250.0
@@ -20,3 +20,5 @@ absolute: MCtoAAC MC AAC 1 long.+trans.dist 0.3 250.0
 absolute: NGFCtoAAC NGFC AAC 6:7 long.+trans.dist 0.183:0.181 250.0
 absolute: HCtoNGFC HC NGFC 2 long.+trans.dist 0.473 250.0
 absolute: NGFCtoNGFC NGFC NGFC 6:7 long.+trans.dist 0.113:0.169 250.0
+absolute: MPPtoGC MPP GC 8 long.+trans.dist 1.0 250.0
+
