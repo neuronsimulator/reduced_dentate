@@ -7,7 +7,7 @@ objref vs, rs, spikevect
 proc init() { local status localobj ff strdef datasetPath, spikedataPath, cmd
     id = $1
     gid = $2
-    datasetPath = $s3
+    datasetPath = $s4
     spikevect = new Vector()
     sprint(spikedataPath,"%s/MPPspiketrain.dat",datasetPath)
     sprint(cmd, "test -e %s", spikedataPath) // check if the path exists
