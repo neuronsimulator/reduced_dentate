@@ -51,6 +51,7 @@ proc synapses() { local i, j, k, x, Lsum localobj syn, lst, rs, rx, lengths
     nsyns_AA   = 4
     nsyns_HCC  = 10
     nsyns_NGFC = 10
+    nsyns_MPP = 1
     naxons_AA = 3
     
     rs = new Random()
@@ -110,7 +111,7 @@ proc synapses() { local i, j, k, x, Lsum localobj syn, lst, rs, rx, lengths
         j = choose_index(MDDidxs,MDDweights,rs) // randomly select middle/distal dendrite
         dendrites[j] { 
             syn = new Exp2Syn(rx.repick()) 
-            syn.tau1 = 0.05  	syn.tau2 = 1.25	syn.e = -85.7 
+            syn.tau1 = 0.05  	syn.tau2 = 1.25	syn.e = -75.0 
         }
         syns_HC.append(syn)
     }
@@ -120,13 +121,13 @@ proc synapses() { local i, j, k, x, Lsum localobj syn, lst, rs, rx, lengths
         j = choose_index(GCLDidxs,GCLDweights,rs) // randomly select GCL dendrite
         dendrites[j] { 
             syn = new Exp2Syn(rx.repick())
-            syn.tau1 = 0.25 syn.tau2 = 2.5  syn.e = -28.99
+            syn.tau1 = 0.25 syn.tau2 = 2.5  syn.e = -75.0
         }
         syns_BC.append(syn)
     }
     soma { 
             syn = new Exp2Syn(rx.repick())
-            syn.tau1 = 0.25 syn.tau2 = 2.5 syn.e = -70.0
+            syn.tau1 = 0.25 syn.tau2 = 2.5 syn.e = -75.0
         }
     syns_BC.append(syn)
     
@@ -137,7 +138,7 @@ proc synapses() { local i, j, k, x, Lsum localobj syn, lst, rs, rx, lengths
             if (x < 1/naxons_AA) {
                 axon[j] { 
                     syn = new Exp2Syn(rx.repick()) 
-                    syn.tau1 = 0.3	syn.tau2 = 2.9 syn.e = -28.99
+                    syn.tau1 = 0.3	syn.tau2 = 2.9 syn.e = -75.0
                 }
                 syns_AA.append(syn)
                 break
@@ -152,7 +153,7 @@ proc synapses() { local i, j, k, x, Lsum localobj syn, lst, rs, rx, lengths
         j = choose_index(PDidxs,PDweights,rs) // randomly select proximal dendrite
         dendrites[j] { 
             syn = new Exp2Syn(rx.repick()) 
-            syn.tau1 = 0.04	syn.tau2 = 1.1	syn.e = -28.99
+            syn.tau1 = 0.04	syn.tau2 = 1.1	syn.e = -75.0
         }
         syns_HCC.append(syn)
     }
@@ -163,12 +164,21 @@ proc synapses() { local i, j, k, x, Lsum localobj syn, lst, rs, rx, lengths
         x = rx.repick()
         dendrites[j] { 
             syn = new Exp2Syn(x) 
-            syn.tau1 = 0.1	syn.tau2 = 10	syn.e = -38.148
+            syn.tau1 = 0.1	syn.tau2 = 10	syn.e = -75.0
             syns_NGFC_GABAA.append(syn)
             syn = new Exp2Syn(x) 
             syn.tau1 = 86.8	syn.tau2 = 428.1 syn.e = -90
             syns_NGFC_GABAB.append(syn)
         }
+    }
+
+    // Simplified PP synapses; 
+    for i=0, nsyns_MPP-1 {
+        soma { 
+            syn = new Exp2Syn(x) 
+            syn.tau1 = 1.0	syn.tau2 = 10	syn.e = 0.0
+        }
+        syns_MPP.append(syn)
     }
     
     
