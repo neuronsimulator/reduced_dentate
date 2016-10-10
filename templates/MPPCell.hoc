@@ -9,18 +9,22 @@ proc init() { local status localobj ff strdef datasetPath, spikedataPath, cmd
     gid = $2
     datasetPath = $s4
     spikevect = new Vector()
-    sprint(spikedataPath,"%s/MPPspiketrain.dat",datasetPath)
-    sprint(cmd, "test -e %s", spikedataPath) // check if the path exists
-    status = system(cmd)
-    if (status == 0) {
-        vs = new VecStim()
-        ff = new File()
-        ff.ropen(spikedataPath)
-        spikevect.scanf(ff)
-        ff.close()
-        vs.play(spikevect)
+    if (id % 10 == 0) {
+        sprint(spikedataPath,"%s/MPPspiketrain.dat",datasetPath)
+	sprint(cmd, "test -e %s", spikedataPath) // check if the path exists
+        status = system(cmd)
+        if (status == 0) {
+     	   vs = new VecStim()
+           ff = new File()
+           ff.ropen(spikedataPath)
+           spikevect.scanf(ff)
+           ff.close()
+       	   vs.play(spikevect)
+	} else {
+           setup_netstim(id,gid,0.1,10,0,1)
+	}
     } else {
-        setup_netstim(id,gid,0.1,10,0,1)
+           setup_netstim(id,gid,0.1,10,0,1)
     }
 }
 
