@@ -19,7 +19,30 @@ proc init() { local status localobj ff strdef datasetPath, spikedataPath, cmd
         spikevect.scanf(ff)
         ff.close()
         vs.play(spikevect)
+    } else {
+        setup_netstim(id,gid,0.1,10,0,1)
     }
+}
+
+
+proc setup_netstim() {
+    id = $1
+    gid = $2
+    rate   = $3
+    number = $4
+    start  = $5
+    noise  = $6
+    vs = new NetStim(.5)
+    if (number > 0) {
+       rs = new RandomStream(id, 21, 27)
+       rs.r.negexp(1)
+       rs.start()
+       vs.noiseFromRandom(rs.r)
+    }
+    vs.interval = 1000/rate
+    vs.number = number
+    vs.start = start
+    vs.noise = noise	
 }
 
 
