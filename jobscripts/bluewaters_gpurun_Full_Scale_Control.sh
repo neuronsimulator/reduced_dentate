@@ -16,7 +16,10 @@
 ### Set umask so users in my group can read job stdout and stderr files
 #PBS -W umask=0027
 
-module swap PrgEnv-cray PrgEnv-pgi
+
+module unload PrgEnv-cray 
+module unload PrgEnv-intel
+module load PrgEnv-pgi
 module load cudatoolkit
 
 set -x
@@ -31,6 +34,6 @@ mkdir -p $results_path
 runhoc="./run.hoc"
 
 aprun -n 1 buildgpu/bin/coreneuron_exec -mpi -d coredat \
-  --cell_permute=1 -e 150 --voltage=-75. --gpu
+  -o $results_path  --cell_permute=1 -e 150 --voltage=-75. --gpu
 
 
