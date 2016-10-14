@@ -10,7 +10,7 @@ cp mechanisms/*.mod modcore
 cp ~/neuron/nrn/src/nrnoc/exp2syn.mod modcore
 
 corenrnbuild -m modcore -s $HOME/bb/coreneuron -i $HOME/bb/install \
-  -b buildgpu -cflags 'DNRN_PRCELLSTATE=1' -nopg
+  -b buildgpu -cflags 'DNRN_PRCELLSTATE=1'
 
 mpiexec -n 1 buildgpu/bin/coreneuron_exec -mpi -d coredat \
   --cell_permute=1 -e 10 --voltage=-75. --gpu

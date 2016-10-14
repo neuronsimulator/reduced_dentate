@@ -16,13 +16,14 @@ begintemplate DGC
 // syns_AA - connections from axo-axonic cells
 // syns_HCC - connections from HICAP cells
 // syns_NGFC - connections from neurogliaform cells
+// syns_MPP - connections from medial perforant path
 //
 
 public soma, axon, dendrites
 public all, allaxons, alldendrites, alldendritesList
 public nDends, nGCLD, nPD, nMD, nDD
 public GCLDidxs, PDidxs, MDidxs, DDidxs
-public syns, syns_GC, syns_MC, syns_HC, syns_BC, syns_AA, syns_HCC, syns_NGFC_GABAA, syns_NGFC_GABAB
+public syns, syns_GC, syns_MC, syns_HC, syns_BC, syns_AA, syns_HCC, syns_NGFC_GABAA, syns_NGFC_GABAB, syns_MPP
 public ndendpts
 public verbose, filemode
 public syn_stim
@@ -41,7 +42,7 @@ objref rates_soma, rates_axon, rates_seg
 objref gna_y_axon, gna_y_dend, dist_x_dend, dist_x_axon
 objref GCLDidxs, PDidxs, MDidxs, DDidxs, ndendpts
 objref GCLDweights, PDweights, MDweights, DDweights, GCLPDweights, MDDweights, GCLPDidxs, MDDidxs
-objref syns, syns_GC, syns_MC, syns_HC, syns_BC, syns_AA, syns_HCC, syns_NGFC_GABAA, syns_NGFC_GABAB
+objref syns, syns_GC, syns_MC, syns_HC, syns_BC, syns_AA, syns_HCC, syns_NGFC_GABAA, syns_NGFC_GABAB, syns_MPP
 objref syn_stim
 
 strdef dendrite_topology_fn
@@ -118,6 +119,7 @@ proc celldef() {
     syns_HCC  = new List()
     syns_NGFC_GABAA = new List()
     syns_NGFC_GABAB = new List()
+    syns_MPP = new List()
     syns = new List() 
 
     syns.append(syns_GC)
@@ -128,6 +130,7 @@ proc celldef() {
     syns.append(syns_HCC)
     syns.append(syns_NGFC_GABAA)
     syns.append(syns_NGFC_GABAB)
+    syns.append(syns_MPP)
     
     topol()
     
