@@ -838,7 +838,7 @@ stdinit()
 if (pnm.myid == 0) {
     printf ("*** Initialization completed\n")
 }
-pnm.pc.nrnbbcore_write("coredat")
+pnm.pc.nrnbbcore_write(coredat)
 pnm.psolve(tstop)
 
 if (pnm.myid == 0) {

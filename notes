@@ -3,6 +3,7 @@ nrnivmodl mechanisms
 mkdir results
 mkdir coredat
 mpiexec -n 6 nrniv -mpi run.hoc
+mpiexec -n 4 ./x86_64/special -c "strdef coredat" -c coredat="\"mytmp\"" run.hoc  -mpi
 cat results/*spike* | sort -k 1n,1n -k 2n,2n > out.spk
 
 mkdir modcore
