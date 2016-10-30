@@ -97,7 +97,7 @@ proc biophys() {
     soma {
         insert na8st
         gbar_na8st = gna_soma
-        insert Ca
+        insert Aradi_Ca
         gtcabar_Ca = CaTmult*0.0015
         gncabar_Ca = CaNmult*0.002
         glcabar_Ca = CaLmult*0.01
