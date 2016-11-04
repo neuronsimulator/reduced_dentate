@@ -6,11 +6,12 @@ default_var("outdir", ".")
 
 // create directory for writing dataset
 {
-    strdef cmd
+    outdir = getcwd()
+    sprint(coredat, "%s/%s", outdir, coredat)
     nrnpython("from commonutils import mkdir_p")
+    strdef cmd
     sprint(cmd, "mkdir_p('%s')", coredat)
     nrnpython(cmd)
-    outdir = getcwd()
     sprint(cmd, "mkdir_p('%s/results')", outdir)
     nrnpython(cmd)
 }
