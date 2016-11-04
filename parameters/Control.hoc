@@ -20,8 +20,8 @@ makegraph = 0
 // Initialization voltage
 v_init = -75
 
-// simulation time
-tstop = 150
+// simulation time, moved to run.hoc as command line option
+// tstop = 150
 
 // maximum wall time in hours
 max_walltime_hrs = 0.5

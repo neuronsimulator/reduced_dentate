@@ -1,6 +1,7 @@
 {xopen("templates/defvar.hoc")}
 
 default_var("coredat", "coredat")
+default_var("tstop", 150)
 
 // create directory for writing dataset
 {
