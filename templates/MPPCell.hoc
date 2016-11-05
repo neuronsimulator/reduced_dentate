@@ -14,7 +14,7 @@ proc init() { local status localobj ff strdef datasetPath, spikedataPath, cmd
 	sprint(cmd, "test -e %s", spikedataPath) // check if the path exists
         status = system(cmd)
         if (status == 0) {
-     	   vs = new VecStim()
+           vs = new VecStimRd()
            ff = new File()
            ff.ropen(spikedataPath)
            spikevect.scanf(ff)

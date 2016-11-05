@@ -1,7 +1,7 @@
 : Transient Na conductance
 
 NEURON {
-	SUFFIX Na
+	SUFFIX Aradi_Na
 	USEION na READ ena WRITE ina
 	RANGE gbar, minf, mtau, hinf, htau, i, g, m, h, taumult, htaumult
 }
