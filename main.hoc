@@ -27,6 +27,8 @@ connectgjstime = 0
 // used for executing command strings
 strdef cmd
 
+tstop = mytstop
+
 // path for various datafiles (used for multiple files)
 strdef datafilePath
 

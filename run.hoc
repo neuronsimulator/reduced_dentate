@@ -1,8 +1,10 @@
 {load_file("defvar.hoc")}
+strdef parameters
+parameters="./parameters/Control.hoc"
 
 default_var("coredat", "coredat")
-default_var("tstop", 150)
 default_var("outdir", ".")
+default_var("mytstop", 150)
 
 // create directory for writing dataset
 {
@@ -15,9 +17,6 @@ default_var("outdir", ".")
     sprint(cmd, "mkdir_p('%s/results')", outdir)
     nrnpython(cmd)
 }
-
-strdef parameters
-parameters="./parameters/Control.hoc"
 
 load_file("main.hoc")
 
