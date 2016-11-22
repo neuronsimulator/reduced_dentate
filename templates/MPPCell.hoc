@@ -12,7 +12,8 @@ proc init() { local status localobj ff strdef datasetPath, spikedataPath, cmd
     if (id % 10 == 0) {
         sprint(spikedataPath,"%s/MPPspiketrain.dat",datasetPath)
 	sprint(cmd, "test -e %s", spikedataPath) // check if the path exists
-        status = system(cmd)
+        // status = system(cmd)
+        status = 0
         if (status == 0) {
            vs = new VecStimRd()
            ff = new File()

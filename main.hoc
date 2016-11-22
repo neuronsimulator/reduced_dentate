@@ -17,7 +17,7 @@ strdef modelName, datasetPrefix, datasetName, datasetPath, resultsPath
 // path to the dataset directory
 sprint(datasetPath, "%s/%s", datasetPrefix, datasetName)
 
-nrn_load_dll("mechanisms/x86_64/.libs/libnrnmech.so")
+//nrn_load_dll("mechanisms/x86_64/.libs/libnrnmech.so")
 
 // used to calculate model construction times and run time
 mkcellstime = 0
@@ -128,7 +128,8 @@ objref ncstimlist
 // reads the cell types file and populates celltypes with the information
 sprint (datafilePath, "%s/stim.dat", datasetPath)
 sprint(cmd, "test -e %s", datafilePath) // check if the path exist
-status = system(cmd)
+// status = system(cmd)
+status = 0
 if (status == 0) {
    loadStimulationInfo (stimTypes, datafilePath, datasetPath)
    if (verbose > 0) {
@@ -369,7 +370,9 @@ proc connectcells() {local i, k, status, srcid, destid, srcid1, destid1, del, di
        }
        sprint(connectivityPath, "%s/%s.dat", datasetPath, connectivityName)
        sprint(cmd, "test -e %s", connectivityPath) // check if the path exist
-       status = system(cmd)
+       // status = system(cmd)
+       // on bg-q we can't run system commands on compute node
+       status = 0
        if (status == 0) {
            f = new File(connectivityPath)
            pernode = 0
