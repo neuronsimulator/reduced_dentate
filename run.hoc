@@ -5,6 +5,14 @@ parameters="./parameters/Control.hoc"
 default_var("coredat", "coredat")
 default_var("outdir", ".")
 default_var("mytstop", 150)
+default_var("coreneuron", 0)
+default_var("gpu", 0)
+default_var("mytstop", 150)
+default_var("dumpmodel", 0)
+
+use_coreneuron = coreneuron
+use_gpu = gpu
+dump_coreneuron_model = dumpmodel
 
 // create directory for writing dataset
 {

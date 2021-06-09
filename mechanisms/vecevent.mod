@@ -1,4 +1,3 @@
-:  Vector stream of events
 
 NEURON {
 	THREADSAFE
@@ -43,7 +42,7 @@ ENDVERBATIM
 VERBATIM
 #include <stdint.h>
 #if NRNBBCORE
-#include "coreneuron/nrniv/ivocvect.h"
+#include "coreneuron/utils/ivocvect.hpp"
 #endif
 ENDVERBATIM
 

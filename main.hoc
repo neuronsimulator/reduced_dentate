@@ -843,12 +843,38 @@ stdinit()
 if (pnm.myid == 0) {
     printf ("*** Initialization completed\n")
 }
-pnm.pc.nrnbbcore_write(coredat)
-pnm.psolve(tstop)
 
-if (pnm.myid == 0) {
+proc prun() { localobj po
+  if(dump_coreneuron_model) {
+     pnm.pc.nrnbbcore_write("coredat")
+  }
+  if (use_coreneuron || use_gpu) {
+    if (!nrnpython("from neuron import coreneuron")) {
+      printf("Python not available to run CoreNEURON\n")
+      return
+    }
+    po = new PythonObject()
+    po.coreneuron.enable = 1
+    if(use_gpu) {
+      po.coreneuron.gpu = 1
+    }
+    if(pnm.pc.id == 0) {
+      printf("nrncore_arg: |%s|\n", po.coreneuron.nrncore_arg(tstop))
+    }
+  } else {
+    tsav = startsw()
+  }
+  pnm.pc.psolve(tstop)
+  if (!use_coreneuron && pnm.pc.id == 0) {
+    printf("psolve time %g\n", startsw() - tsav)
+  }
+
+  if (pnm.myid == 0) {
     printf ("*** Simulation completed\n")
+  }
 }
+
+prun()
 
 /* Write simulation results */
 
