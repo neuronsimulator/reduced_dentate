@@ -23,7 +23,7 @@ NEURON {
     SUFFIX KIn
     USEION k READ ek WRITE ik : local K may affect ion flux, and ion fluc may affect local K
     RANGE gkbar, gk, scale_a, scale_i : functions of position  
-    GLOBAL ninf, ntau, hinf, htau
+    RANGE ninf, ntau, hinf, htau
 }
  
 PARAMETER {

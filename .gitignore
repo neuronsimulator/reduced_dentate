@@ -1,0 +1,7 @@
+sources/
+build/
+install/
+*slurm*
+*.log
+*.spk
+__pycache__/
