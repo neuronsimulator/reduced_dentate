@@ -15,7 +15,6 @@ UNITS {
 PARAMETER {
 	glcabar		 (mho/cm2)
 	ki=.001 (mM)
-	cao (mM)
         tfa=1
 }
 
@@ -24,7 +23,7 @@ NEURON {
 	SUFFIX lca
 	USEION lca READ elca WRITE ilca VALENCE 2
 	USEION ca READ cai, cao VALENCE 2 
-        RANGE glcabar, cai, ilca, elca
+        RANGE glcabar, ilca, elca
         :GLOBAL minf,matu
 	RANGE minf,matu
 }
@@ -42,7 +41,7 @@ ASSIGNED {
         matu   (ms)
 	elca (mV)   
 	cai (mM)
-
+	cao (mM)
 }
 
 INITIAL {
