@@ -50,13 +50,13 @@ srun dplace $INSTALL_DIR/nrn_cnrn_gpu_mod2c/special/x86_64/special -c mytstop=$S
 cat results/*spike* | sort -k 1n,1n -k 2n,2n > nrn_cnrn_gpu_mod2c.spk
 rm -rf results
 
-#echo "----------------- CoreNEURON SIM (GPU_NMODL) ----------------"
-#export PYTHONPATH=$INSTALL_DIR/nrn_cnrn_gpu_nmodl/lib/python:$PYTHONPATH_INIT
-#rm nrn_cnrn_gpu_nmodl.log nrn_cnrn_gpu_nmodl.spk
-#srun dplace $INSTALL_DIR/nrn_cnrn_gpu_nmodl/special/x86_64/special -c mytstop=$SIM_TIME -c coreneuron=1 -c gpu=1 run.hoc -mpi 2>&1 | tee nrn_cnrn_gpu_nmodl.log
-## Sort the spikes
-#cat results/*spike* | sort -k 1n,1n -k 2n,2n > nrn_cnrn_gpu_nmodl.spk
-#rm -rf results
+echo "----------------- CoreNEURON SIM (GPU_NMODL) ----------------"
+export PYTHONPATH=$INSTALL_DIR/nrn_cnrn_gpu_nmodl/lib/python:$PYTHONPATH_INIT
+rm nrn_cnrn_gpu_nmodl.log nrn_cnrn_gpu_nmodl.spk
+srun dplace $INSTALL_DIR/nrn_cnrn_gpu_nmodl/special/x86_64/special -c mytstop=$SIM_TIME -c coreneuron=1 -c gpu=1 run.hoc -mpi 2>&1 | tee nrn_cnrn_gpu_nmodl.log
+# Sort the spikes
+cat results/*spike* | sort -k 1n,1n -k 2n,2n > nrn_cnrn_gpu_nmodl.spk
+rm -rf results
 
 echo quit | nvidia-cuda-mps-control
 # =============================================================================
@@ -73,13 +73,13 @@ else
     echo "nrn_gpu.spk nrn_cnrn_gpu_mod2c.spk are the same"
 fi
 
-#DIFF=$(diff nrn_gpu.spk nrn_cnrn_gpu_nmodl.spk)
-#if [ "$DIFF" != "" ] 
-#then
-#    echo "nrn_gpu.spk nrn_cnrn_gpu_nmodl.spk are not the same"
-#else
-#    echo "nrn_gpu.spk nrn_cnrn_gpu_nmodl.spk are the same"
-#fi
+DIFF=$(diff nrn_gpu.spk nrn_cnrn_gpu_nmodl.spk)
+if [ "$DIFF" != "" ] 
+then
+    echo "nrn_gpu.spk nrn_cnrn_gpu_nmodl.spk are not the same"
+else
+    echo "nrn_gpu.spk nrn_cnrn_gpu_nmodl.spk are the same"
+fi
 
 # =============================================================================
 
@@ -91,8 +91,8 @@ echo "----------------- NEURON SIM STATS (CPU) ----------------"
 grep "psolve" nrn_gpu.log
 echo "----------------- CoreNEURON SIM (GPU_MOD2C) STATS ----------------"
 grep "Solver Time : " nrn_cnrn_gpu_mod2c.log
-#echo "----------------- CoreNEURON SIM (GPU_NMODL) STATS ----------------"
-#grep "Solver Time : " nrn_cnrn_gpu_nmodl.log
+echo "----------------- CoreNEURON SIM (GPU_NMODL) STATS ----------------"
+grep "Solver Time : " nrn_cnrn_gpu_nmodl.log
 
 echo "---------------------------------------------"
 echo "---------------------------------------------"
