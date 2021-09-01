@@ -59,13 +59,13 @@ unload_intel() {
 }
 
 load_pgi_cuda() {
-    module load nvhpc cuda
-    export CC=$(which pgcc)
-    export CXX=$(which pgc++)
+    module load gcc nvhpc cuda
+    export CC=$(which nvc)
+    export CXX=$(which nvc++)
 }
 
 unload_pgi_cuda() {
-    module unload nvhpc cuda
+    module unload gcc nvhpc cuda
     unset CC
     unset CXX
 }
@@ -183,6 +183,7 @@ install_nrn_cnrn_gpu_mod2c() {
         -DCORENRN_ENABLE_UNIT_TESTS=OFF \
         -DCMAKE_C_COMPILER=$CC \
         -DCMAKE_CXX_COMPILER=$CXX \
+        -DCMAKE_CUDA_COMPILER=nvcc \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo
     make -j && make install
     popd
@@ -210,6 +211,7 @@ install_nrn_cnrn_gpu_nmodl() {
         -DCORENRN_ENABLE_UNIT_TESTS=OFF \
         -DCMAKE_C_COMPILER=$CC \
         -DCMAKE_CXX_COMPILER=$CXX \
+        -DCMAKE_CUDA_COMPILER=nvcc \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo
     make -j && make install
     popd
@@ -242,10 +244,10 @@ install_nmodl
 install_nrn_cnrn_cpu_mod2c
 install_nrn_cnrn_cpu_nmodl
 install_nrn_cnrn_gpu_mod2c
-#install_nrn_cnrn_gpu_nmodl
+install_nrn_cnrn_gpu_nmodl
 
 # 4. Generate library
 run_nrnivmodl nrn_cnrn_cpu_mod2c
 run_nrnivmodl nrn_cnrn_cpu_nmodl
 run_nrnivmodl nrn_cnrn_gpu_mod2c
-#run_nrnivmodl nrn_cnrn_gpu_nmodl
+run_nrnivmodl nrn_cnrn_gpu_nmodl
