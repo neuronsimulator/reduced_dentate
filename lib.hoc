@@ -273,6 +273,9 @@ proc loadCellCategoryInfo() { local i, numCells, offset, minIndex, maxIndex loca
             ff.ropen(indexPath)
             indicesCoords.scanf(ff)
             ff.close(indexPath)
+            if (max_cells_per_type_to_load > 0 && indicesCoords.nrow > max_cells_per_type_to_load) {
+                indicesCoords.resize(max_cells_per_type_to_load, indicesCoords.ncol)
+            }
             indices = indicesCoords.getcol(0)
             numCells = indices.size()
             minIndex = indices.min()
