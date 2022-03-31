@@ -148,11 +148,16 @@ static void bbcore_read(double* xarray, int* iarray, int* xoffset, int* ioffset,
   xa = xarray + *xoffset;
   ia = iarray + *ioffset;
   dsize = ia[0];
-  if (!_p_ptr) {
-    _p_ptr = (double*)vector_new1(dsize);
+
+
+  IvocVect* pv = (IvocVect*)_p_ptr;
+  if(!pv) {
+    pv = (IvocVect*)vector_new1 (dsize);
   }
-  assert(dsize == vector_capacity((IvocVect*)_p_ptr));
-  dv = vector_vec((IvocVect*)_p_ptr);
+  assert(dsize == vector_capacity(pv));
+  _p_ptr = (double*)pv;
+
+  dv = vector_vec(pv);
   for (i = 0; i < dsize; ++i) {
     dv[i] = xa[i];
   }
