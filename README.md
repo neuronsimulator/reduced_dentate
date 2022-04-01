@@ -1,5 +1,3 @@
-
-
 This model of a dentate granule cell was taken from the following
 paper and modified by Ivan Raikov:
 
@@ -15,6 +13,10 @@ understand the contribution of M and SK channels to the medium
 afterhyperpolarization (mAHP) following one or seven spikes, as 
 well as the contribution of M channels to the slow 
 afterhyperpolarization (sAHP). 
+
+### Compatibility
+
+- This version of the model is compatible with NEURON versions newer than 8.1 (#5)
 
 ### Running this model with NEURON and CoreNEURON
 

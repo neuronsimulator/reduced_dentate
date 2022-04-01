@@ -194,18 +194,6 @@ INITIAL {
        }
 }
 
-VERBATIM
-#include "nrnran123.h"
-
-#if !NRNBBCORE
-/* backward compatibility */
-double nrn_random_pick(void* r);
-void* nrn_random_arg(int argpos);
-int nrn_random_isran123(void* r, uint32_t* id1, uint32_t* id2, uint32_t* id3);
-int nrn_random123_getseq(void* r, uint32_t* seq, char* which);
-#endif
-ENDVERBATIM
-
 FUNCTION mynormrand(mean, std) {
 VERBATIM
 	if (_p_donotuse) {
@@ -215,7 +203,7 @@ VERBATIM
 		if (_ran_compat == 2) {
 			x = nrnran123_normal((nrnran123_State*)_p_donotuse);
 		}else{		
-			x = nrn_random_pick(_p_donotuse);
+			x = nrn_random_pick((Rand*)_p_donotuse);
 		}
 #else
 		#pragma acc routine(nrnran123_normal) seq
@@ -281,7 +269,7 @@ PROCEDURE noiseFromRandom() {
 VERBATIM
 #if !NRNBBCORE
  {
-	void** pv = (void**)(&_p_donotuse);
+	Rand** pv = (Rand**)(&_p_donotuse);
 	if (_ran_compat == 2) {
 		fprintf(stderr, "Gfluct3.noiseFromRandom123 was previously called\n");
 		assert(0);
@@ -290,7 +278,7 @@ VERBATIM
 	if (ifarg(1)) {
 		*pv = nrn_random_arg(1);
 	}else{
-		*pv = (void*)0;
+		*pv = (Rand*)0;
 	}
  }
 #endif
@@ -350,7 +338,7 @@ static void bbcore_write(double* x, int* d, int* xx, int *offset, _threadargspro
 #if !NRNBBCORE
 		if (_ran_compat == 1) { 
 			char which;
-			void** pv = (void**)(&_p_donotuse);
+			Rand** pv = (Rand**)(&_p_donotuse);
 			/* error if not using Random123 generator */
 			if (!nrn_random_isran123(*pv, di, di+1, di+2)) {
 				fprintf(stderr, "Gfluct3: Random123 generator is required\n");
